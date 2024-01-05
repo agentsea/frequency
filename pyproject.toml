@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "frequency"
+version = "0.1.0"
+description = "Effiently serve LoRA tuned models"
+authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.108.0"
+
+[tool.poetry.group.dev.dependencies]
+fastapi-code-generator = "^0.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

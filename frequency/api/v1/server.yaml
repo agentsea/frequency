@@ -1,0 +1,323 @@
+openapi: 3.0.0
+
+info:
+  version: 1.0.0
+  title: Frequency API
+  description: API for Frequency
+
+paths:
+  /v1:
+    get:
+      summary: API info
+      operationId: getRoot
+      tags:
+        - Base
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Info"
+
+  /v1/health:
+    get:
+      summary: Health info
+      operationId: getHealth
+      tags:
+        - Base
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Health"
+
+  /v1/models:
+    post:
+      summary: Load a model
+      operationId: loadModel
+      tags:
+        - Model
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V1LoadModelRequest"
+
+      responses:
+        "200":
+          description: Models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Model"
+
+    get:
+      summary: A list of models
+      operationId: getModels
+      tags:
+        - Model
+      responses:
+        "200":
+          description: A model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Models"
+
+  /v1/models/{name}:
+    get:
+      summary: Get a model
+      operationId: getModel
+      tags:
+        - Model
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The model name
+      responses:
+        "200":
+          description: A model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Model"
+    delete:
+      summary: Delete a model
+      operationId: deleteModel
+      tags:
+        - Model
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The model name
+      responses:
+        "200":
+          description: Success
+
+  /v1/models/{name}/chat:
+    post:
+      summary: Chat with a model
+      operationId: chatModel
+      tags:
+        - Model
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The model name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V1ChatRequest"
+      responses:
+        "200":
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1ChatResponse"
+
+  /v1/adapters:
+    post:
+      summary: Load an adapter
+      operationId: loadAdapter
+      tags:
+        - Adapter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V1Adapter"
+
+      responses:
+        "200":
+          description: Adapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Adapter"
+
+    get:
+      summary: A list of adapters
+      operationId: getAdapters
+      tags:
+        - Adapter
+      responses:
+        "200":
+          description: An adapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Adapters"
+
+  /v1/adapters/{name}:
+    get:
+      summary: Get an adapter
+      operationId: getAdapter
+      tags:
+        - Adapter
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The adapter name
+      responses:
+        "200":
+          description: A model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1Adapter"
+    delete:
+      summary: Delete an adapter
+      operationId: deleteAdapter
+      tags:
+        - Adapter
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The adapter name
+      responses:
+        "200":
+          description: Success
+
+components:
+  schemas:
+    V1Health:
+      description: Health info
+      type: object
+      properties:
+        status:
+          type: string
+
+    V1Info:
+      description: API info
+      type: object
+      properties:
+        version:
+          type: string
+
+    V1LoadModelRequest:
+      type: object
+      description: Request to load a model
+      required:
+        - type
+        - name
+        - hf_repo
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        hf_repo:
+          type: string
+
+    V1Model:
+      type: object
+      description: A model
+      required:
+        - type
+        - name
+        - hf_repo
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        hf_repo:
+          type: string
+        adapters:
+          type: array
+          items:
+            type: string
+
+    V1Models:
+      type: object
+      description: A model
+      required:
+        - models
+      properties:
+        models:
+          type: array
+          items:
+            $ref: "#/components/schemas/V1Model"
+
+    V1ChatRequest:
+      type: object
+      description: A chat request
+      required:
+        - query
+      properties:
+        query:
+          type: string
+        adapters:
+          type: array
+          items:
+            type: string
+        history:
+          $ref: "#/components/schemas/V1ChatHistory"
+
+    V1ChatResponse:
+      type: object
+      description: A chat response
+      required:
+        - text
+      properties:
+        text:
+          type: string
+        history:
+          $ref: "#/components/schemas/V1ChatHistory"
+
+    V1ChatHistory:
+      type: object
+      description: A chat history
+      additionalProperties:
+        type: string
+
+    V1Adapter:
+      type: object
+      description: An adapter
+      required:
+        - type
+        - uri
+        - model
+      properties:
+        name:
+          type: string
+        uri:
+          type: string
+        model:
+          type: string
+
+    V1Adapters:
+      type: object
+      description: Adapters
+      required:
+        - adapters
+      properties:
+        adapters:
+          type: array
+          items:
+            $ref: "#/components/schemas/V1Adapter"
