@@ -8,20 +8,21 @@ from fastapi import APIRouter
 
 from ..dependencies import *
 
-router = APIRouter(tags=['Base'])
+router = APIRouter(tags=["Base"])
 
 
-@router.get('/v1', response_model=V1Info, tags=['Base'])
+@router.get("/v1", response_model=V1Info, tags=["Base"])
 def get_root() -> V1Info:
     """
     API info
     """
-    pass
+    # TODO
+    return V1Info(version="0.0.1")
 
 
-@router.get('/v1/health', response_model=V1Health, tags=['Base'])
+@router.get("/v1/health", response_model=V1Health, tags=["Base"])
 def get_health() -> V1Health:
     """
     Health info
     """
-    pass
+    return V1Health(status="ok")

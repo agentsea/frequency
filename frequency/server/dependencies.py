@@ -14,4 +14,5 @@ from .models import (
     V1LoadModelRequest,
     V1Model,
     V1Models,
+    V1ChatHistory,
 )

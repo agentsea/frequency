@@ -1,0 +1,3 @@
+gpu_mem_usage:
+  inference: 20GB
+  peft_lora: 27GB

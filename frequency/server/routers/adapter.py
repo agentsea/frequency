@@ -4,40 +4,48 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from ..dependencies import *
+from frequency.adapter import Adapter
 
-router = APIRouter(tags=['Adapter'])
+router = APIRouter(tags=["Adapter"])
 
 
-@router.post('/v1/adapters', response_model=V1Adapter, tags=['Adapter'])
+@router.post("/v1/adapters", response_model=V1Adapter, tags=["Adapter"])
 def load_adapter(body: V1Adapter = None) -> V1Adapter:
     """
     Load an adapter
     """
-    pass
+    adapter = Adapter.from_v1_schema(body)
+    adapter.cache()
+    adapter.save()
+    return adapter.to_v1_schema()
 
 
-@router.get('/v1/adapters', response_model=V1Adapters, tags=['Adapter'])
+@router.get("/v1/adapters", response_model=V1Adapters, tags=["Adapter"])
 def get_adapters() -> V1Adapters:
     """
     A list of adapters
     """
-    pass
+    return Adapter.list_v1()
 
 
-@router.get('/v1/adapters/{name}', response_model=V1Adapter, tags=['Adapter'])
+@router.get("/v1/adapters/{name}", response_model=V1Adapter, tags=["Adapter"])
 def get_adapter(name: str) -> V1Adapter:
     """
     Get an adapter
     """
-    pass
+    adapter = Adapter.find(name)
+    if not adapter:
+        return HTTPException(status_code=404, detail="adapter not found")
+
+    return adapter.to_v1_schema()
 
 
-@router.delete('/v1/adapters/{name}', response_model=None, tags=['Adapter'])
+@router.delete("/v1/adapters/{name}", response_model=None, tags=["Adapter"])
 def delete_adapter(name: str) -> None:
     """
     Delete an adapter
     """
-    pass
+    Adapter.delete(name)

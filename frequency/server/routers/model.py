@@ -3,49 +3,61 @@
 #   timestamp: 2024-01-05T05:18:11+00:00
 
 from __future__ import annotations
+from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from ..dependencies import *
+from frequency.model import Model, MODELS
 
-router = APIRouter(tags=['Model'])
+router = APIRouter(tags=["Model"])
 
 
-@router.post('/v1/models', response_model=V1Model, tags=['Model'])
+@router.post("/v1/models", response_model=V1Model, tags=["Model"])
 def load_model(body: V1LoadModelRequest = None) -> V1Model:
     """
     Load a model
     """
-    pass
+    model = Model(name=body.name, type=body.type, hf_repo=body.hf_repo)
+
+    return model.to_v1_schema()
 
 
-@router.get('/v1/models', response_model=V1Models, tags=['Model'])
+@router.get("/v1/models", response_model=V1Models, tags=["Model"])
 def get_models() -> V1Models:
     """
     A list of models
     """
-    pass
+    return Model.list_v1()
 
 
-@router.get('/v1/models/{name}', response_model=V1Model, tags=['Model'])
+@router.get("/v1/models/{name}", response_model=V1Model, tags=["Model"])
 def get_model(name: str) -> V1Model:
     """
     Get a model
     """
-    pass
+    model = Model.find(name)
+    if not model:
+        return HTTPException(status_code=404, detail="model not found")
+
+    return model.to_v1_schema()
 
 
-@router.delete('/v1/models/{name}', response_model=None, tags=['Model'])
+@router.delete("/v1/models/{name}", response_model=None, tags=["Model"])
 def delete_model(name: str) -> None:
     """
     Delete a model
     """
-    pass
+    Model.delete(name)
 
 
-@router.post('/v1/models/{name}/chat', response_model=V1ChatResponse, tags=['Model'])
+@router.post("/v1/models/{name}/chat", response_model=V1ChatResponse, tags=["Model"])
 def chat_model(name: str, body: V1ChatRequest = None) -> V1ChatResponse:
     """
     Chat with a model
     """
-    pass
+    model = Model.find(name)
+    if not model:
+        return HTTPException(404, "model not found, did you load it?")
+
+    return model.chat_v1(body.query, body.history, body.adapters)

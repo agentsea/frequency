@@ -13,7 +13,7 @@ pip install frequency-ai
 Install server component on Kubernetes
 
 ```
-helm install oci://frequency.ai/frequency-server:0.0.1
+helm install frequency oci://artifact.frequency.ai/frequency-server:0.0.1
 ```
 
 ## Usage
@@ -29,11 +29,9 @@ client = Client("localhost:9000")
 
 # Load an hf model onto the server
 model = client.load_model(name="qwen-vl-chat", hf_repo="Qwen/Qwen-VL-Chat", type=AutoModelForCausalLM)
-print(resp)
 
 # Cache an adapter on the server that was trained on dog images
 resp = model.cache_adapter(name="dog", uri="gs://my-adapters/dog_lora.pt")
-print(resp)
 
 # Query the model with the hot swap adapter
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
@@ -46,15 +44,6 @@ query = tokenizer.from_list_format([
 # Chat with the model using the dog adapter
 response, history = model.chat(query=query, adapters=["dog"])
 #> Here is a picture of a Corgi
-
-response, history = model.chat(query="Output the detection frame of the dog's head", adapters=["dog"], history=history)
-print(response)
-#> <ref>Dog head/ref><box>(517,508),(589,611)</box>
-
-image = tokenizer.draw_bbox_on_latest_picture(response, history)
-
-if image:
-  image.save('head.jpg')
 
 # Cache an adapter on the server that was trained on cat images
 resp = model.cache_adapter(name="cat", uri="gs://my-adapters/cat_lora.pt")
