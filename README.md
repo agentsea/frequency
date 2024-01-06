@@ -31,7 +31,7 @@ client = Client("localhost:9000")
 model = client.load_model(name="qwen-vl-chat", hf_repo="Qwen/Qwen-VL-Chat", type=AutoModelForCausalLM)
 
 # Cache an adapter on the server that was trained on dog images
-resp = model.cache_adapter(name="dog", uri="gs://my-adapters/dog_lora.pt")
+resp = model.cache_adapter(name="dog", uri="gs://my-adapters/dog_lora/")
 
 # Query the model with the hot swap adapter
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
@@ -46,7 +46,7 @@ response, history = model.chat(query=query, adapters=["dog"])
 #> Here is a picture of a Corgi
 
 # Cache an adapter on the server that was trained on cat images
-resp = model.cache_adapter(name="cat", uri="gs://my-adapters/cat_lora.pt")
+resp = model.cache_adapter(name="cat", uri="gs://my-adapters/cat_lora/")
 print(resp)
 
 query = tokenizer.from_list_format([
