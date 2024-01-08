@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 import runpod
 
@@ -15,9 +15,20 @@ class RunPodProvider(InferenceProvider):
             raise ValueError("must set $RUNPOD_API_KEY")
         runpod.api_key = key
 
-    def run(self, name: str, image: str, gpu_type: str) -> InferenceEndpiont:
-        resp = runpod.create_pod(name, image, gpu_type)
+    def run(
+        self,
+        name: str,
+        image: Optional[str] = None,
+        gpu_type: Optional[str] = None,
+        gpu_memory: Optional[int] = None,
+        gpu_cpu_count: Optional[int] = None,
+        hf_repo: Optional[str] = None,
+    ) -> InferenceEndpiont:
+        resp = runpod.create_pod(name, image, gpu_type, ports=["8000/tcp"])
         print("response from create: ", resp)
+
+        endpoint = f"https://{name}-8000.proxy.runpod.net"
+        return InferenceEndpiont(endpoint)
 
     def status(self, name: str) -> Dict[str, Any]:
         resp = runpod.get_pod(name)

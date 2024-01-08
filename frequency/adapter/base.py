@@ -18,13 +18,20 @@ class Adapter(WithDB):
 
     name: str
     uri: str
+    hf_repo: str
     model: str
 
-    def __init__(self, name: str, uri: str, model: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        model: str,
+        hf_repo: Optional[str] = None,
+        uri: Optional[str] = None,
+    ) -> None:
         self.name = name
         self.uri = uri
         self.model = model
-        self.cache()
+        self.hf_repo = hf_repo
         self.save()
 
     def to_v1_schema(self) -> V1AdapterSchema:
@@ -32,13 +39,25 @@ class Adapter(WithDB):
 
     @classmethod
     def from_v1_schema(cls, adapter: V1AdapterSchema) -> Adapter:
-        return cls(name=adapter.name, uri=adapter.uri, model=adapter.model)
+        out = cls.__new__(Adapter)
+        out.name = adapter.name
+        out.uri = adapter.uri
+        out.hf_repo = adapter.hf_repo
+        out.model = adapter.model
+        return out
 
     def to_v1_record(self) -> V1AdapterRecord:
-        return V1AdapterRecord(name=self.name, uri=self.uri, model=self.model)
+        return V1AdapterRecord(
+            name=self.name, uri=self.uri, model=self.model, hf_repo=self.hf_repo
+        )
 
     @classmethod
     def from_v1_record(cls, record: V1AdapterRecord) -> Adapter:
+        out = cls.__new__(Adapter)
+        out.name = record.name
+        out.uri = record.uri
+        out.hf_repo = record.hf_repo
+        out.model = record.model
         return cls(name=record.name, uri=record.uri, model=record.model)
 
     def save(self) -> None:
@@ -75,21 +94,6 @@ class Adapter(WithDB):
     @classmethod
     def path_for_name(cls, name: str) -> str:
         return os.path.join(CACHE_DIR, name)
-
-    def cache(self) -> str:
-        """Cache the adapter to a local path"""
-
-        if self.uri.startswith("gs://"):
-            bucket_name, object_key = parse_gcs_uri(self.uri)
-            client = storage.Client()
-            bucket = client.get_bucket(bucket_name)
-            blob = bucket.blob(object_key)
-
-            path = self.path()
-            blob.download_to_filename(path)
-
-            print(f"cached adapter '{self.uri}' to path {path}")
-            return path
 
     @classmethod
     def delete(cls, name: str) -> bool:

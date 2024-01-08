@@ -190,7 +190,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 body = {
                     "hf_repo": "str",  # Required.
                     "name": "str",  # Required.
-                    "type": "str"  # Required.
+                    "type": "str",  # Required.
+                    "cuda": bool  # Optional.
                 }
 
                 # response body for status code(s): 200
@@ -200,7 +201,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "type": "str",  # Required.
                     "adapters": [
                         "str"  # Optional.
-                    ]
+                    ],
+                    "cuda": bool  # Optional.
                 }
         """
 
@@ -231,7 +233,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "type": "str",  # Required.
                     "adapters": [
                         "str"  # Optional.
-                    ]
+                    ],
+                    "cuda": bool  # Optional.
                 }
         """
 
@@ -257,7 +260,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 body = {
                     "hf_repo": "str",  # Required.
                     "name": "str",  # Required.
-                    "type": "str"  # Required.
+                    "type": "str",  # Required.
+                    "cuda": bool  # Optional.
                 }
 
                 # response body for status code(s): 200
@@ -267,7 +271,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "type": "str",  # Required.
                     "adapters": [
                         "str"  # Optional.
-                    ]
+                    ],
+                    "cuda": bool  # Optional.
                 }
         """
         error_map = {
@@ -349,7 +354,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                             "type": "str",  # Required.
                             "adapters": [
                                 "str"  # Optional. Required.
-                            ]
+                            ],
+                            "cuda": bool  # Optional. Required.
                         }
                     ]
                 }
@@ -418,7 +424,8 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "type": "str",  # Required.
                     "adapters": [
                         "str"  # Optional.
-                    ]
+                    ],
+                    "cuda": bool  # Optional.
                 }
         """
         error_map = {
@@ -540,17 +547,17 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "adapters": [
                         "str"  # Optional.
                     ],
-                    "history": {
-                        "str": "str"  # Optional. A chat history.
-                    }
+                    "history": [
+                        {}  # Optional. A chat history.
+                    ]
                 }
 
                 # response body for status code(s): 200
                 response == {
                     "text": "str",  # Required.
-                    "history": {
-                        "str": "str"  # Optional. A chat history.
-                    }
+                    "history": [
+                        {}  # Optional. A chat history.
+                    ]
                 }
         """
 
@@ -579,9 +586,9 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 # response body for status code(s): 200
                 response == {
                     "text": "str",  # Required.
-                    "history": {
-                        "str": "str"  # Optional. A chat history.
-                    }
+                    "history": [
+                        {}  # Optional. A chat history.
+                    ]
                 }
         """
 
@@ -611,17 +618,17 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "adapters": [
                         "str"  # Optional.
                     ],
-                    "history": {
-                        "str": "str"  # Optional. A chat history.
-                    }
+                    "history": [
+                        {}  # Optional. A chat history.
+                    ]
                 }
 
                 # response body for status code(s): 200
                 response == {
                     "text": "str",  # Required.
-                    "history": {
-                        "str": "str"  # Optional. A chat history.
-                    }
+                    "history": [
+                        {}  # Optional. A chat history.
+                    ]
                 }
         """
         error_map = {
@@ -705,15 +712,17 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 # JSON input template you can fill out and use as your body input.
                 body = {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
 
                 # response body for status code(s): 200
                 response == {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
         """
 
@@ -740,8 +749,9 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 # response body for status code(s): 200
                 response == {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
         """
 
@@ -766,15 +776,17 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 # JSON input template you can fill out and use as your body input.
                 body = {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
 
                 # response body for status code(s): 200
                 response == {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
         """
         error_map = {
@@ -852,8 +864,9 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                     "adapters": [
                         {
                             "model": "str",  # Required.
-                            "uri": "str",  # Required.
-                            "name": "str"  # Optional. Required.
+                            "name": "str",  # Required.
+                            "hf_repo": "str",  # Optional. Required.
+                            "uri": "str"  # Optional. Required.
                         }
                     ]
                 }
@@ -918,8 +931,9 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
                 # response body for status code(s): 200
                 response == {
                     "model": "str",  # Required.
-                    "uri": "str",  # Required.
-                    "name": "str"  # Optional.
+                    "name": "str",  # Required.
+                    "hf_repo": "str",  # Optional.
+                    "uri": "str"  # Optional.
                 }
         """
         error_map = {

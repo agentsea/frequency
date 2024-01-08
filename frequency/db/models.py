@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB  # If using PostgreSQL
@@ -25,14 +25,15 @@ class V1LoadModelRequestRecord(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     type = Column(String, nullable=False)
-    hf_repo = Column(String, nullable=False)
+    hf_repo = Column(String)
 
 
 class V1ModelRecord(Base):
     __tablename__ = "v1_model"
     name = Column(String, primary_key=True, nullable=False)
     type = Column(String, nullable=False)
-    hf_repo = Column(String, nullable=False)
+    hf_repo = Column(String)
+    cuda = Column(Boolean)
     # For adapters, assuming a many-to-many relationship
     adapters = relationship("V1AdapterRecord", secondary="model_adapter_link")
 
@@ -40,8 +41,9 @@ class V1ModelRecord(Base):
 class V1AdapterRecord(Base):
     __tablename__ = "v1_adapter"
     name = Column(String, primary_key=True)
-    uri = Column(String, nullable=False)
     model = Column(String, nullable=False)
+    uri = Column(String)
+    hf_repo = Column(String)
 
 
 # Many-to-Many Link Table for V1ModelRecord and V1AdapterRecord

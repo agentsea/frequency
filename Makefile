@@ -9,4 +9,8 @@ gen-client:
 
 .PHONY: serve
 serve:
-	poetry run uvicorn frequency.server.main:app --reload
+	poetry run uvicorn frequency.server.main:app --reload --host 0.0.0.0
+
+.PHONY:
+integration:
+	poetry run python -m tests.integration

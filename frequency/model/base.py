@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import get_peft_model, PeftMixedModel
 from accelerate import Accelerator
 
-from frequency.api.v1.server.models import V1Model, V1ChatHistory, V1ChatResponse
+from frequency.api.v1.server.models import V1Model, V1ChatResponse
 from frequency.db.conn import WithDB
 from frequency.db.models import V1ModelRecord
 from frequency.adapter.base import Adapter
@@ -29,14 +29,21 @@ class Model(WithDB):
     type: str
     hf_repo: str
     adapters: Optional[List[Adapter]] = None
+    cuda: bool
 
     def __init__(
-        self, name: str, type: str, hf_repo: str, adapters: Optional[List[str]] = None
+        self,
+        name: str,
+        type: str,
+        hf_repo: str,
+        adapters: List[str] = [],
+        cuda: bool = True,
     ) -> None:
         self.name = name
         self.type = type
         self.hf_repo = hf_repo
         self.adapters = adapters
+        self.cuda = cuda
         self.load()
         self.save()
 
@@ -55,6 +62,7 @@ class Model(WithDB):
         out.name = model.name
         out.type = model.type
         out.hf_repo = model.hf_repo
+        out.cuda = model.cuda
 
         if model.adapters:
             adapters = []
@@ -73,6 +81,7 @@ class Model(WithDB):
             type=self.type,
             hf_repo=self.hf_repo,
             adapters=adapters,
+            cuda=self.cuda,
         )
 
     @classmethod
@@ -84,20 +93,26 @@ class Model(WithDB):
         out.name = record.name
         out.type = record.type
         out.hf_repo = record.hf_repo
+        out.cuda = record.cuda
         out.adapters = adapters
+        return out
 
     def save(self) -> None:
         for db in self.get_db():
+            print("saving: ", self.__dict__)
             record = self.to_v1_record()
+            print("record: ", self.__dict__)
             db.merge(record)
             db.commit()
 
     @classmethod
     def find(cls, name: str) -> Optional[Model]:
         for db in cls.get_db():
+            print("getting record..")
             record: Optional[V1ModelRecord] = (
                 db.query(V1ModelRecord).filter_by(name=name).first()
             )
+            print("model record: ", record)
             if record:
                 return cls.from_v1_record(record)
 
@@ -133,10 +148,16 @@ class Model(WithDB):
         tokenizer = AutoTokenizer.from_pretrained(self.hf_repo, trust_remote_code=True)
 
         if self.type == "AutoModelForCausalLM":
-            model = AutoModelForCausalLM.from_pretrained(
-                "Qwen/Qwen-VL-Chat", device_map="cuda", trust_remote_code=True
-            ).eval()
-            model = accelerator.prepare(model)
+            print(f"loading repo: {self.hf_repo}")
+            if self.cuda:
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.hf_repo, device_map="cuda", trust_remote_code=True
+                )
+            else:
+                model = AutoModelForCausalLM.from_pretrained(
+                    self.hf_repo, trust_remote_code=True
+                )
+            # model = accelerator.prepare(model)
             # TODO: lock
             MODELS[self.name] = LoadedModel(model, tokenizer)
 
@@ -146,33 +167,64 @@ class Model(WithDB):
     def get_class(self) -> Optional[LoadedModel]:
         return MODELS.get(self.name)
 
+    def add_adapter(self, adapter: Adapter) -> None:
+        loaded = self.get_class()
+        if not loaded:
+            raise ValueError("could not find model, was it loaded?")
+
+        print(f"adding adapter name: '{adapter.name}' repo: '{adapter.hf_repo}' ...")
+        loaded.model.load_adapter(adapter.hf_repo, adapter_name=adapter.name)
+        print("added adapter")
+        self.adapters.append(adapter)
+        self.save()
+
+    def delete_adapter(self, name: str) -> None:
+        loaded = self.get_class()
+        if not loaded:
+            raise ValueError("could not find model, was it loaded?")
+
+        print(f"deleting adapter {name}...")
+        loaded.model.delete_adapter(name)
+        print("delete adapter")
+
+        adapters = []
+        for adapter in self.adapters:
+            if adapter.name == name:
+                continue
+            adapters.append(adapter)
+        self.adapters = adapters
+        self.save()
+
     def chat_v1(
         self,
         query: str,
-        history: Optional[V1ChatHistory] = None,
+        history: Optional[List] = None,
         adapters: List[str] = [],
     ) -> V1ChatResponse:
         loaded = self.get_class()
         print("loaded class")
         if adapters:
             print("using adapters: ", adapters)
-            adapter0 = Adapter.find(adapters[0])
-            peft_model = PeftMixedModel.from_pretrained(
-                loaded.model, adapter0.path(), adapter0.name
+            if len(adapters) > 1:
+                raise ValueError(
+                    "multiple adapters not yet supported https://github.com/huggingface/transformers/issues/28372"
+                )
+            print(f"setting adapter: {adapters[0]}")
+            loaded.model.set_adapter(adapters[0])
+
+        print("calling chat...")
+        if hasattr(loaded.model, "chat"):
+            response, history = loaded.model.chat(
+                loaded.tokenizer, query=query, history=history
             )
+            print("\nresponse: ", response)
+            print("\nhistory: ", history)
 
-            for name in adapters[1:]:
-                adapter = Adapter.find(name)
-                peft_model.load_adapter(adapter.path(), adapter_name=adapter.name)
-
-            peft_model.set_adapter(adapters)
-
+            return V1ChatResponse(text=response, history=history)
+        else:
             inputs = loaded.tokenizer(query, return_tensors="pt")
-            peft_model(**inputs)
-        response, history = loaded.model.chat(
-            loaded.tokenizer, query=query, history=history
-        )
-        print("\nresponse: ", response)
-        print("\nhistory: ", history)
-
-        return V1ChatResponse(text=response, history=V1ChatHistory(history))
+            output = loaded.model.generate(**inputs)
+            decoded_output = loaded.tokenizer.decode(
+                output[0], skip_special_tokens=True
+            )
+            return V1ChatResponse(text=decoded_output)

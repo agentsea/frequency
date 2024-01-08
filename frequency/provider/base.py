@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from dataclasses import dataclass
+from typing import Dict, Any, List, Optional
 
 
 class TuningResult:
@@ -14,6 +15,7 @@ class TuningProvider(ABC):
         pass
 
 
+@dataclass
 class InferenceEndpiont:
     endpoint: str
 
@@ -22,7 +24,15 @@ class InferenceProvider(ABC):
     """An inference infra provider"""
 
     @abstractmethod
-    def run(self, name: str, image: str, gpu_type: str) -> InferenceEndpiont:
+    def run(
+        self,
+        name: str,
+        image: Optional[str] = None,
+        gpu_type: Optional[str] = None,
+        gpu_memory: Optional[int] = None,
+        gpu_cpu_count: Optional[int] = None,
+        hf_repo: Optional[str] = None,
+    ) -> InferenceEndpiont:
         pass
 
     @abstractmethod

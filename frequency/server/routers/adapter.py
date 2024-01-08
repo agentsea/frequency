@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 
 from ..dependencies import *
 from frequency.adapter import Adapter
+from frequency.model import Model
 
 router = APIRouter(tags=["Adapter"])
 
@@ -18,8 +19,12 @@ def load_adapter(body: V1Adapter = None) -> V1Adapter:
     Load an adapter
     """
     adapter = Adapter.from_v1_schema(body)
-    adapter.cache()
-    adapter.save()
+    print("finding model: ", body.__dict__)
+    model = Model.find(body.model)
+    print("found model: ", model)
+    if not model:
+        return HTTPException(status_code=404, detail="model not found")
+    model.add_adapter(adapter)
     return adapter.to_v1_schema()
 
 

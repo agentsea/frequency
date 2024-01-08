@@ -18,7 +18,7 @@ def load_model(body: V1LoadModelRequest = None) -> V1Model:
     """
     Load a model
     """
-    model = Model(name=body.name, type=body.type, hf_repo=body.hf_repo)
+    model = Model(name=body.name, type=body.type, hf_repo=body.hf_repo, cuda=body.cuda)
 
     return model.to_v1_schema()
 
