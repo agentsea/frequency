@@ -6,7 +6,7 @@ steps:
         "-t",
         "gcr.io/agentsea-dev/frequency-qwen-vl:$COMMIT_SHA",
         "-f",
-        "docker/qwen-vl/infer/Dockerfile",
+        "docker/qwen_vl/infer/Dockerfile",
         ".",
       ]
   # Build the second image
