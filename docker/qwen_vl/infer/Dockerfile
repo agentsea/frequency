@@ -7,6 +7,9 @@ RUN mkdir -p ${workdir}
 WORKDIR ${workdir}
 COPY . /var/app
 
+# Install SQLite development package
+RUN apt-get update && apt-get install -y libsqlite3-dev
+
 # Install Qwen dependencies
 RUN python -m pip install -r ./docker/qwen_vl/infer/requirements.txt
 
