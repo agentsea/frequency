@@ -51,13 +51,15 @@ def delete_model(name: str) -> None:
     Model.delete(name)
 
 
-@router.post("/v1/models/{name}/chat", response_model=V1ChatResponse, tags=["Model"])
-def chat_model(name: str, body: V1ChatRequest = None) -> V1ChatResponse:
+@router.post(
+    "/v1/models/{name}/generate", response_model=V1GenerateResponse, tags=["Model"]
+)
+def generate(name: str, body: V1GenerateRequest = None) -> V1GenerateResponse:
     """
-    Chat with a model
+    Generate text
     """
     model = Model.find(name)
     if not model:
         return HTTPException(404, "model not found, did you load it?")
 
-    return model.chat_v1(body.query, body.history, body.adapters)
+    return model.generate_v1(body.query, body.adapters)

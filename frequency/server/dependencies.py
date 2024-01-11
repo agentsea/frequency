@@ -7,8 +7,8 @@ from __future__ import annotations
 from frequency.api.v1.server.models import (
     V1Adapter,
     V1Adapters,
-    V1ChatRequest,
-    V1ChatResponse,
+    V1GenerateRequest,
+    V1GenerateResponse,
     V1Health,
     V1Info,
     V1LoadModelRequest,

@@ -105,10 +105,10 @@ paths:
         "200":
           description: Success
 
-  /v1/models/{name}/chat:
+  /v1/models/{name}/generate:
     post:
-      summary: Chat with a model
-      operationId: chatModel
+      summary: Generate text
+      operationId: generate
       tags:
         - Model
       parameters:
@@ -123,14 +123,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/V1ChatRequest"
+              $ref: "#/components/schemas/V1GenerateRequest"
       responses:
         "200":
-          description: Chat response
+          description: Generate response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/V1ChatResponse"
+                $ref: "#/components/schemas/V1GenerateResponse"
 
   /v1/adapters:
     post:
@@ -268,9 +268,9 @@ components:
           items:
             $ref: "#/components/schemas/V1Model"
 
-    V1ChatRequest:
+    V1GenerateRequest:
       type: object
-      description: A chat request
+      description: A generation request
       required:
         - query
       properties:
@@ -280,12 +280,8 @@ components:
           type: array
           items:
             type: string
-        history:
-          type: array
-          description: A chat history
-          items: {}
 
-    V1ChatResponse:
+    V1GenerateResponse:
       type: object
       description: A chat response
       required:
@@ -293,10 +289,6 @@ components:
       properties:
         text:
           type: string
-        history:
-          type: array
-          description: A chat history
-          items: {}
 
     # V1ChatHistory:
     #   type: array

@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import get_peft_model, PeftMixedModel
 from accelerate import Accelerator
 
-from frequency.api.v1.server.models import V1Model, V1ChatResponse
+from frequency.api.v1.server.models import V1Model, V1GenerateResponse
 from frequency.db.conn import WithDB
 from frequency.db.models import V1ModelRecord
 from frequency.adapter.base import Adapter
@@ -195,12 +195,7 @@ class Model(WithDB):
         self.adapters = adapters
         self.save()
 
-    def chat_v1(
-        self,
-        query: str,
-        history: Optional[List] = None,
-        adapters: List[str] = [],
-    ) -> V1ChatResponse:
+    def generate_v1(self, query: str, adapters: List[str] = []) -> V1GenerateResponse:
         loaded = self.get_class()
         print("loaded class")
         if adapters:
@@ -211,20 +206,12 @@ class Model(WithDB):
                 )
             print(f"setting adapter: {adapters[0]}")
             loaded.model.set_adapter(adapters[0])
-
-        print("calling chat...")
-        if hasattr(loaded.model, "chat"):
-            response, history = loaded.model.chat(
-                loaded.tokenizer, query=query, history=history
-            )
-            print("\nresponse: ", response)
-            print("\nhistory: ", history)
-
-            return V1ChatResponse(text=response, history=history)
         else:
-            inputs = loaded.tokenizer(query, return_tensors="pt")
-            output = loaded.model.generate(**inputs)
-            decoded_output = loaded.tokenizer.decode(
-                output[0], skip_special_tokens=True
-            )
-            return V1ChatResponse(text=decoded_output)
+            print("not using any adapters")
+
+        print("generating")
+        inputs = loaded.tokenizer(query, return_tensors="pt")
+        output = loaded.model.generate(**inputs)
+        decoded_output = loaded.tokenizer.decode(output[0], skip_special_tokens=True)
+        print("decoded output: ", decoded_output)
+        return V1GenerateResponse(text=decoded_output)
