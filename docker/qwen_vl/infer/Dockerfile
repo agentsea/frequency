@@ -4,8 +4,6 @@ FROM runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
 ARG workdir=/var/app
 RUN mkdir -p ${workdir}
 
-RUN git lfs install
-
 WORKDIR ${workdir}
 COPY . /var/app
 
