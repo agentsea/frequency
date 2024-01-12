@@ -1,10 +1,13 @@
 [tool.poetry]
-name = "frequency"
-version = "0.1.0"
+name = "frequency-ai"
+version = "0.1.3"
 description = "Effiently serve LoRA tuned models"
 authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
 license = "Apache 2.0"
 readme = "README.md"
+packages = [
+    {include = "frequency"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"

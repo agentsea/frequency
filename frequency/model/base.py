@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import get_peft_model, PeftMixedModel
 from accelerate import Accelerator
+import torch
 
 from frequency.api.v1.server.models import V1Model, V1GenerateResponse
 from frequency.db.conn import WithDB
@@ -146,18 +147,19 @@ class Model(WithDB):
 
     def load(self) -> None:
         tokenizer = AutoTokenizer.from_pretrained(self.hf_repo, trust_remote_code=True)
+        device = "cuda" if torch.cuda.is_available() and self.cuda else "cpu"
 
         if self.type == "AutoModelForCausalLM":
             print(f"loading repo: {self.hf_repo}")
-            if self.cuda:
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.hf_repo, device_map="cuda", trust_remote_code=True
-                )
-            else:
-                model = AutoModelForCausalLM.from_pretrained(
-                    self.hf_repo, trust_remote_code=True
-                )
-            # model = accelerator.prepare(model)
+            model = AutoModelForCausalLM.from_pretrained(
+                self.hf_repo, trust_remote_code=True
+            )
+
+            # Move model to the correct device
+            model.to(device)
+            print(f"Model moved to {device}")
+
+            # model = accelerator.prepare(model)  # Uncomment if using Accelerator
             # TODO: lock
             MODELS[self.name] = LoadedModel(model, tokenizer)
 
