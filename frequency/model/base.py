@@ -200,6 +200,9 @@ class Model(WithDB):
     def generate_v1(self, query: str, adapters: List[str] = []) -> V1GenerateResponse:
         loaded = self.get_class()
         print("loaded class")
+        device = "cuda" if torch.cuda.is_available() and self.cuda else "cpu"
+        loaded.model.to(device)
+
         if adapters:
             print("using adapters: ", adapters)
             if len(adapters) > 1:
