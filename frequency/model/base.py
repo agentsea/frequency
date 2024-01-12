@@ -200,8 +200,8 @@ class Model(WithDB):
     def generate_v1(self, query: str, adapters: List[str] = []) -> V1GenerateResponse:
         loaded = self.get_class()
         print("loaded class")
-        device = "cuda" if torch.cuda.is_available() and self.cuda else "cpu"
-        loaded.model.to(device)
+        # device = "cuda" if torch.cuda.is_available() and self.cuda else "cpu"
+        # loaded.model.to(device)
 
         if adapters:
             print("using adapters: ", adapters)
@@ -216,7 +216,10 @@ class Model(WithDB):
 
         print("generating")
         inputs = loaded.tokenizer(query, return_tensors="pt")
-        output = loaded.model.generate(**inputs)
-        decoded_output = loaded.tokenizer.decode(output[0], skip_special_tokens=True)
-        print("decoded output: ", decoded_output)
-        return V1GenerateResponse(text=decoded_output)
+        inputs = inputs.to(loaded.model.device)
+        print("making prediction")
+        pred = loaded.model.generate(**inputs)
+        print("raw pred")
+        response = loaded.tokenizer.decode(pred.cpu()[0], skip_special_tokens=False)
+        print("decoded output: ", response)
+        return V1GenerateResponse(text=response)
