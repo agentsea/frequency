@@ -63,3 +63,15 @@ def generate(name: str, body: V1GenerateRequest = None) -> V1GenerateResponse:
         return HTTPException(404, "model not found, did you load it?")
 
     return model.generate_v1(body.query, body.adapters)
+
+
+@router.post("/v1/models/{name}/chat", response_model=V1ChatResponse, tags=["Model"])
+def chat_model(name: str, body: V1ChatRequest = None) -> V1ChatResponse:
+    """
+    Chat with a model
+    """
+    model = Model.find(name)
+    if not model:
+        return HTTPException(404, "model not found, did you load it?")
+
+    return model.chat_v1(body.query, body.history, body.adapters)

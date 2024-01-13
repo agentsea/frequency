@@ -14,4 +14,6 @@ from frequency.api.v1.server.models import (
     V1LoadModelRequest,
     V1Model,
     V1Models,
+    V1ChatRequest,
+    V1ChatResponse,
 )

@@ -7,7 +7,7 @@ from peft import get_peft_model, PeftMixedModel
 from accelerate import Accelerator
 import torch
 
-from frequency.api.v1.server.models import V1Model, V1GenerateResponse
+from frequency.api.v1.server.models import V1Model, V1GenerateResponse, V1ChatResponse
 from frequency.db.conn import WithDB
 from frequency.db.models import V1ModelRecord
 from frequency.adapter.base import Adapter
@@ -196,6 +196,32 @@ class Model(WithDB):
             adapters.append(adapter)
         self.adapters = adapters
         self.save()
+
+    def chat_v1(
+        self,
+        query: str,
+        history: Optional[List] = None,
+        adapters: List[str] = [],
+    ) -> V1ChatResponse:
+        loaded = self.get_class()
+        print("loaded class")
+        if adapters:
+            print("using adapters: ", adapters)
+            if len(adapters) > 1:
+                raise ValueError(
+                    "multiple adapters not yet supported https://github.com/huggingface/transformers/issues/28372"
+                )
+            print(f"setting adapter: {adapters[0]}")
+            loaded.model.set_adapter(adapters[0])
+
+        print("calling chat...")
+        response, history = loaded.model.chat(
+            loaded.tokenizer, query=query, history=history
+        )
+        print("\nresponse: ", response)
+        print("\nhistory: ", history)
+
+        return V1ChatResponse(text=response, history=history)
 
     def generate_v1(self, query: str, adapters: List[str] = []) -> V1GenerateResponse:
         loaded = self.get_class()

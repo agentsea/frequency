@@ -105,6 +105,33 @@ paths:
         "200":
           description: Success
 
+  /v1/models/{name}/chat:
+    post:
+      summary: Chat with a model
+      operationId: chatModel
+      tags:
+        - Model
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+            minimum: 1
+          description: The model name
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/V1ChatRequest"
+      responses:
+        "200":
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/V1ChatResponse"
+
   /v1/models/{name}/generate:
     post:
       summary: Generate text
@@ -267,6 +294,36 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/V1Model"
+
+    V1ChatRequest:
+      type: object
+      description: A chat request
+      required:
+        - query
+      properties:
+        query:
+          type: string
+        adapters:
+          type: array
+          items:
+            type: string
+        history:
+          type: array
+          description: A chat history
+          items: {}
+
+    V1ChatResponse:
+      type: object
+      description: A chat response
+      required:
+        - text
+      properties:
+        text:
+          type: string
+        history:
+          type: array
+          description: A chat history
+          items: {}
 
     V1GenerateRequest:
       type: object
