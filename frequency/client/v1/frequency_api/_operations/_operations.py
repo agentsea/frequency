@@ -126,7 +126,7 @@ def build_frequency_api_delete_model_request(name: str, **kwargs: Any) -> HttpRe
     return HttpRequest(method="DELETE", url=_url, **kwargs)
 
 
-def build_frequency_api_chat_model_request(name: str, **kwargs: Any) -> HttpRequest:
+def build_frequency_api_chat_request(name: str, **kwargs: Any) -> HttpRequest:
     _headers = case_insensitive_dict(kwargs.pop("headers", {}) or {})
 
     content_type: Optional[str] = kwargs.pop("content_type", _headers.pop("Content-Type", None))
@@ -707,7 +707,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
             return cls(pipeline_response, None, {})  # type: ignore
 
     @overload
-    def chat_model(
+    def chat(
         self, name: str, body: Optional[JSON] = None, *, content_type: str = "application/json", **kwargs: Any
     ) -> JSON:
         """Chat with a model.
@@ -749,7 +749,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
         """
 
     @overload
-    def chat_model(
+    def chat(
         self, name: str, body: Optional[IO[bytes]] = None, *, content_type: str = "application/json", **kwargs: Any
     ) -> JSON:
         """Chat with a model.
@@ -780,7 +780,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
         """
 
     @distributed_trace
-    def chat_model(self, name: str, body: Optional[Union[JSON, IO[bytes]]] = None, **kwargs: Any) -> JSON:
+    def chat(self, name: str, body: Optional[Union[JSON, IO[bytes]]] = None, **kwargs: Any) -> JSON:
         """Chat with a model.
 
         Chat with a model.
@@ -843,7 +843,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
             else:
                 _json = None
 
-        _request = build_frequency_api_chat_model_request(
+        _request = build_frequency_api_chat_request(
             name=name,
             content_type=content_type,
             json=_json,

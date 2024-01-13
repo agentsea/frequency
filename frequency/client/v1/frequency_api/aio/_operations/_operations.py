@@ -22,7 +22,7 @@ from azure.core.tracing.decorator_async import distributed_trace_async
 from azure.core.utils import case_insensitive_dict
 
 from ..._operations._operations import (
-    build_frequency_api_chat_model_request,
+    build_frequency_api_chat_request,
     build_frequency_api_delete_adapter_request,
     build_frequency_api_delete_model_request,
     build_frequency_api_generate_request,
@@ -521,7 +521,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
             return cls(pipeline_response, None, {})  # type: ignore
 
     @overload
-    async def chat_model(
+    async def chat(
         self, name: str, body: Optional[JSON] = None, *, content_type: str = "application/json", **kwargs: Any
     ) -> JSON:
         """Chat with a model.
@@ -563,7 +563,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
         """
 
     @overload
-    async def chat_model(
+    async def chat(
         self, name: str, body: Optional[IO[bytes]] = None, *, content_type: str = "application/json", **kwargs: Any
     ) -> JSON:
         """Chat with a model.
@@ -594,7 +594,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
         """
 
     @distributed_trace_async
-    async def chat_model(self, name: str, body: Optional[Union[JSON, IO[bytes]]] = None, **kwargs: Any) -> JSON:
+    async def chat(self, name: str, body: Optional[Union[JSON, IO[bytes]]] = None, **kwargs: Any) -> JSON:
         """Chat with a model.
 
         Chat with a model.
@@ -657,7 +657,7 @@ class FrequencyAPIOperationsMixin(FrequencyAPIMixinABC):
             else:
                 _json = None
 
-        _request = build_frequency_api_chat_model_request(
+        _request = build_frequency_api_chat_request(
             name=name,
             content_type=content_type,
             json=_json,

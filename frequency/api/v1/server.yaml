@@ -108,7 +108,7 @@ paths:
   /v1/models/{name}/chat:
     post:
       summary: Chat with a model
-      operationId: chatModel
+      operationId: chat
       tags:
         - Model
       parameters:
