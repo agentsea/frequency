@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "frequency-ai"
-version = "0.1.5"
+version = "0.1.7"
 description = "Effiently serve LoRA tuned models"
 authors = ["Patrick Barker <patrickbarkerco@gmail.com>"]
 license = "Apache 2.0"
@@ -11,7 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-fastapi = "^0.108.0"
+fastapi = ">=0.109.0,<0.110.0" 
 sqlalchemy = "^2.0.25"
 uvicorn = "^0.25.0"
 azure-core = "^1.29.6"

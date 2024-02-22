@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from .v1.frequency_api import FrequencyAPI
 from frequency.api.v1.server.models import (
@@ -6,6 +6,7 @@ from frequency.api.v1.server.models import (
     V1ChatResponse,
     V1LoadModelRequest,
     V1Adapter,
+    V1Health,
 )
 
 
@@ -17,13 +18,13 @@ class ModelClient:
         self._model_name = model_name
 
     def chat(
-        self, query: str, history: List, adapters: List[str] = []
+        self, query: str, history: List = [], adapters: List[str] = []
     ) -> Tuple[str, List]:
         """Chat with the model.
 
         Args:
             query (str): Query to chat with the model.
-            history (List): Chat history.
+            history (List, optional): Chat history. Defaults to [].
             adapters (List[str], optional): List of adapters to add to the call. Defaults to [].
 
         Returns:
@@ -54,6 +55,15 @@ class FrequencyClient:
         self._addr = addr
         self._client = FrequencyAPI(endpoint=addr)
 
+    def health(self) -> V1Health:
+        """Health of the server.
+
+        Returns:
+            V1Health: Server health
+        """
+        resp = self._client.get_health()
+        return V1Health(**resp)
+
     def load_model(
         self,
         hf_repo: str,
@@ -69,19 +79,25 @@ class FrequencyClient:
             type (str, optional): HF type. Defaults to "AutoModelForCausalLM".
             cuda (bool, optional): Whether to use cuda. Defaults to True.
         """
-        req = V1LoadModelRequest(hf_repo=hf_repo, name=name, type=type, cuda=cuda)
+        req = V1LoadModelRequest(name=name, type=type, hf_repo=hf_repo, cuda=cuda)
+        print("req dict: ", req.__dict__)
         self._client.load_model(req.__dict__)
+        print("loaded model")
         return ModelClient(addr=self._addr, model_name=name)
 
     def chat(
-        self, model_name: str, query: str, history: List, adapters: List[str] = []
+        self,
+        model_name: str,
+        query: str,
+        history: List = [],
+        adapters: List[str] = [],
     ) -> Tuple[str, List]:
         """Chat with the model.
 
         Args:
             model_name (str): Name of the model to chat with.
             query (str): Query to chat with the model.
-            history (List): Chat history.
+            history (List, optional): Chat history. Defaults to [].
             adapters (List[str], optional): List of adapters to add to the call. Defaults to [].
 
         Returns:
